@@ -1,0 +1,66 @@
+
+    
+:coffeescript
+    $ ->
+#background
+    %meta{:content => "text/html; charset=UTF-8", "http-equiv" => "Content-Type"}/
+    %link{:href => "//fonts.googleapis.com/css?family=Raleway", :rel => "stylesheet", :type => "text/css"}/ 
+    .title GALLERY
+    .wrapper
+        .saved
+            .body-text Week 2 – Monday's melody 
+            %audio{:controls => "controls"}
+                %source{:src => "http://fast.moodmixes.com/images/classical_preview.mp3", :type => "audio/mpeg"}
+        .saved    
+            .body-text Week 1 – My first song
+            %audio{:controls => "controls"}
+                %source{:src => "/audio_samples/RecordedSong(3).ogg", :type => "audio/mpeg"}
+
+    // IGNORE, BUT KEEP THIS LINE (Back button)   
+= render :partial => "application/back_to_root"
+    
+:scss
+    #background {
+        background : #8FD5D5;
+        background : rgba(143, 213, 213, 1);
+        position: relative; 
+        left : 0px;
+        top : 0px;
+        display: flex;
+        width : 100%;
+        height : 100%;
+        vertical-align: center;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .wrapper {
+        position: absolute;
+        top: 10%;
+    }
+    
+    .saved {
+        margin: 50px;
+    }
+    
+    .title {
+        position: relative; 
+        font-family : Raleway;
+        font-weight : bold;
+        font-size : 50px;
+        color : #FFFFFF;
+        color : rgb(255, 255, 255);
+        padding: 30px;
+        padding-left: 15px;
+        text-align: center
+
+    }
+    
+    .body-text {
+        font-family : Raleway;
+        font-size : 23px;
+        color : #F1F2F2;
+        color : rgb(241, 242, 242);
+        border: 0px; 
+    }

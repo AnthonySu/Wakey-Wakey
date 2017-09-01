@@ -1,0 +1,197 @@
+:coffeescript
+    $ ->
+        console.log 'its a start'
+
+    
+#background
+    %meta{:content => "text/html; charset=UTF-8", "http-equiv" => "Content-Type"}/
+    %link{:href => "//fonts.googleapis.com/css?family=Raleway", :rel => "stylesheet", :type => "text/css"}/ 
+    .container
+        .row
+            //.title NICELY DONE!
+            .title.6 Bravo!
+            
+            .progress-cylinder.six-bars
+            // .progress-cylinder.five-bars
+            // .progress-cylinder.four-bars
+            // .progress-cylinder.three-bars
+            // .progress-cylinder.two-bars
+            // .progress-cylinder.one-bar
+
+            // #progress-box
+            //     .progress
+            //         .progress-bar.progress-bar-striped.active{"aria-valuemax" => "100", "aria-valuemin" => "0", "aria-valuenow" => "40", :role => "progressbar", :style => "width:40%"}  40%
+            
+            //.body-text.1 You are 1/6 done with your song! 
+            //.body-text.2 You are 2/6 done with your song!
+            //.body-text.3 You are 3/6 done with your song!
+            //.body-text.4 You are 4/6 done with your song!
+            //.body-text.5 You are 5/6 done with your song!
+            .body-text.6 You've completed your masterpiece!
+            .playbutton 
+                %img{:height => "50", :src => "/playbutton.png", :width => "50"}/
+
+
+
+
+// IGNORE, BUT KEEP THIS LINE (Back button)   
+= render :partial => "application/back_to_root"
+    
+:scss
+    #progress-box{
+        width: 100%;
+        padding: 0px 30px;
+        display: block;
+    }
+    
+    .playbutton {
+        position: relative;
+        left: 45%;
+        
+    }
+    
+    $touchpad-bg: rgb(143, 213, 213);
+    $touch-square: lighten($touchpad-bg, 100%);
+    
+    .progress-cylinder
+    {
+        background : #8fd5d5;
+        background : rgba(143, 213, 213, 1);
+        border-style : Solid;
+        border-color : #304878;
+        border-color : rgba(143, 213, 213, 1);
+        border-width : 5px;
+        border-radius : 39px;
+        -moz-border-radius : 63px;
+        -webkit-border-radius : 63px;
+        padding: 39px; 
+        margin: 30 px; 
+        border: 15 px; 
+        left-padding: 15px; 
+    }
+    
+    .cylinder-element{
+        background : #ED6E46;
+        background : rgba(237, 110, 70, 1);
+        border-style : Solid;
+        border-color : #304878;
+        border-color : rgba(48, 72, 120, 1);
+        border-width : 2px;
+        padding: 40px; 
+    }
+    
+    #left{
+        background-image : url("/cylinder-element#left.png");
+        background-repeat : no-repeat;
+        background-size: contain;
+        width : 120px;
+        height : 120px;
+        -moz-border-radius : 63px;
+        -webkit-border-radius : 63px;
+        
+    }
+    .cylinder-end-left{
+        background-image : url("/cylinder-element#left.png");
+        background-repeat : no-repeat;
+        background-size: contain;
+        width : 100%;
+        height : 100%;
+        
+    }
+    .title
+    {
+        position: relative; 
+        font-family : Raleway;
+        font-weight : bold;
+        font-size :70px;
+        color : #FFFFFF;
+        color : rgb(255, 255, 255);
+        padding: 70px; 
+    }
+    #background
+    {
+        background : #8FD5D5;
+        background : rgba(143, 213, 213, 1);
+        position: relative; 
+        left : 0px;
+        top : 0px;
+        display: flex;
+        width : 100%;
+        height : 100%;
+        vertical-align: center;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .body-text 
+    {
+        font-family : Raleway;
+        font-size : 25px;
+        color : #F1F2F2;
+        color : rgb(241, 242, 242);
+        padding: 50px; 
+        text-align: center;
+    }
+    .one-bar{
+        background-image : url("/1-bar.png");
+        background-repeat : no-repeat;
+        height: 100%; 
+        width: 100% ; 
+        background-size: contain;
+        left-padding: 40px; 
+    }
+    .two-bars{
+        background-image : url("/2-bars.png");
+        background-repeat : no-repeat;
+        height: 100%; 
+        width: 100% ; 
+        background-size: contain;
+        left-padding: 40px; 
+    }
+
+    .three-bars{
+        background-image : url("/3-bars.png");
+        background-repeat : no-repeat;
+        height: 100%; 
+        width: 100% ; 
+        background-size: contain;
+        left-padding: 40px; 
+    }
+
+    .four-bars{
+        background-image : url("/4-bars.png");
+        background-repeat : no-repeat;
+        height: 100%; 
+        width: 100% ; 
+        background-size: contain;
+        left-padding: 40px; 
+    }
+    
+    .five-bars{
+        background-image : url("/5-bars.png");
+        background-repeat : no-repeat;
+        height: 100%; 
+        width: 100% ; 
+        background-size: contain;
+        left-padding: 40px; 
+    }
+    
+    .six-bars{
+        background-image : url("/song-completed.png");
+        background-repeat : no-repeat;
+        height: 100%; 
+        width: 100% ; 
+        background-size: contain;
+        left-padding: 40px; 
+       
+    }
+
+
+
+
+    // #back-button{
+    //     position: absolute;
+    //     z-index: 100;
+    //     top: 15px;
+    //     left: 15px;
+    // }

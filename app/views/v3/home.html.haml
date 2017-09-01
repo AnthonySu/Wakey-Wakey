@@ -1,0 +1,40 @@
+:coffeescript
+    $ ->
+        console.warn "IS HAMMER INSTALLED?", Hammer
+    
+#touchpad
+    #touch-square
+    %h2 TOUCH ME!
+    
+// IGNORE, BUT KEEP THIS LINE (Back button)   
+//= render :partial => "application/back_to_root"
+    
+:scss
+    $touchpad-bg: desaturate(green, 70%);
+    $touch-square: lighten($touchpad-bg, 70%);
+    #touchpad{
+        height: 100%;
+        width: 100%;
+        color: white;
+        font-family: Avenir, sans-serif;
+        font-size: 4em;
+        text-align: center;
+            
+        background: $touchpad-bg;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        #touch-square{
+            width: 150px;
+            height: 150px;
+            background: $touch-square;
+        }
+    }
+    #back-button{
+        position: absolute;
+        z-index: 100;
+        top: 15px;
+        left: 15px;
+    }
+    

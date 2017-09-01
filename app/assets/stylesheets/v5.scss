@@ -1,0 +1,232 @@
+// Place all the styles related to the v5 controller here.
+// They will automatically be included in application.css.
+// You can use Sass (SCSS) here: http://sass-lang.com/
+
+// Check if the color is a cool color
+
+@function is-cool-color($color) {
+	@return hue($color) < 300 and hue($color) > 120;
+}
+
+// Check if the color is high value or low value
+
+@function is-high-key-value($color) {
+	@return hue($color) > 30 and hue($color) < 140;
+}
+
+
+//Establish a relationship (similar lighting conditions) between colors.
+
+@function harmonious-mix($mix, $base) {
+	@if (is-cool-color($mix)){
+		@if is-high-key-value($base) {
+			@return mix($mix, $base, 11%);
+		}
+		@else {
+			@return mix($mix, $base, 16%);
+		}
+	}
+	@else {
+		@if is-high-key-value($base) {
+			@return mix($mix, $base, 13%);
+		}
+		@else {
+			@return mix($mix, $base, 23%);
+		}
+	}
+}
+
+@function mix-neutral($color) {
+	@if (is-highest-key-value($color)) {
+		@if is-high-key-value(complement($color)) {
+			@return mix(complement($color), $color, 19%);
+		}
+		@else {
+			@return mix(complement($color), $color, 13%);
+		}
+	}
+	@else if (is-high-key-value($color)) {
+		@if is-high-key-value(complement($color)) {
+			@return mix(complement($color), $color, 31%);
+		}
+		@else {
+			@return mix(complement($color), $color, 23%);
+		}
+	}
+	@else {
+		@if is-highest-key-value(complement($color)) {
+			@return mix(complement($color), $color, 31%);
+		}
+		@if is-high-key-value(complement($color)) {
+			@return mix(complement($color), $color, 26%);
+		}
+		@else {
+			@return mix(complement($color), $color, 23%);
+		}
+	}
+}
+
+@function pick-contrast($color) {
+	@if is-high-key-value($color){
+		@if lightness($color) < 30% {
+			@return lighten(complement($color), 86);
+		}
+		@else if lightness($color) > 70% {
+			@return darken(complement($color), 68);
+		}
+		@else {
+			@return darken(complement($color), 53);
+		}
+} @else {
+	@if lightness($color) < 30% {
+			@return lighten(complement($color), 86);
+		}
+		@else if lightness($color) > 70% {
+			@return darken(complement($color), 68);
+		}
+		@else {
+			@return lighten(complement($color), 53);
+		}
+	}
+}
+
+
+$background: #88499c;
+$block: #e78024;
+
+$base: yellow;
+$comp: complement($base);
+$hmix-bc: harmonious-mix($base, $comp);
+$hmix-cb: harmonious-mix($comp, $base);
+$mixNeutralBase: mix-neutral($base);
+$mixNeutralComp: mix-neutral($comp);
+
+.flexbox-container{
+    display: flex;
+    background: $background;
+    height: 100%;
+    width: 100%;
+}
+.flex-block{
+    background: #e78024;
+    width: 100px;
+    height: 50px;
+    width: 200px;
+    height: 100px;
+    margin: 20px;
+}
+
+// #swatches {
+    // display: flex;
+    // flex-wrap: wrap;
+    // justify-contx
+// }
+
+#c {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center
+}
+
+#c1, #c2, #c3 {
+    min-height: 27%;
+    min-width: 100%;
+}
+
+#d {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center
+}
+
+#d1, #d2, #d3 {
+    min-height: 100%;
+    min-width: 27%;
+}
+
+#a-flex {
+    flex-wrap: wrap;
+    justify-content: center;
+    justify-content: space-around;
+    align-content: flex-start;
+}
+
+.a {
+    min-height: 20%;
+    min-width: 16%;
+    
+}
+
+#b-flex {
+    flex-wrap: wrap;
+    justify-content: space-around;
+    align-content: space-around;
+    align-items: center;
+}
+
+
+.b {
+    min-height: 20%;
+    min-width: 16%;
+}
+
+
+#e {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-content: flex-start;
+    
+}
+
+.e {
+    min-height: 20%;
+    min-width: 16%;
+}
+
+#s1 {
+    background: $base;
+}
+
+#s2 {
+    background: $comp;
+}
+
+#s3 {
+    background: $hmix-bc;
+}
+
+#s4 {
+    background: $hmix-cb;
+}
+
+#s5 {
+    background: lighten($mixNeutralBase, 20%);
+}
+
+#s6 {
+    background: $mixNeutralBase; 
+}
+
+#s7 {
+    background: darken($mixNeutralBase, 20%);
+}
+
+#s8 {
+    background: lighten($mixNeutralComp, 20%);
+}
+
+#s9 {
+    background: $mixNeutralComp;
+}
+
+#s10 {
+    background: darken($mixNeutralComp, 20%);
+}
+
+
+
+
+

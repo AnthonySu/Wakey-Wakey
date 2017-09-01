@@ -1,0 +1,51 @@
+-#%a{href: "/v1/oneTwo"}
+-# %img{src: "", width: "0%"}
+    
+    
+:coffeescript
+    liveClock = (almHour, almMinute) ->
+        d = new Date
+        curr_hour = d.getHours()
+        curr_min = d.getMinutes()
+        if curr_hour == almHour && curr_min == almMinute
+            location.href = 'alertuser'
+        
+        ###
+        curr_sec = d.getSeconds()
+        if curr_hour > 12
+            curr_hour = curr_hour - 12
+        curr_sec = "0" + curr_sec if curr_sec < 10
+        document.getElementById('time').innerHTML = curr_hour + ':' + curr_min + ':' + curr_sec
+        ###
+        return
+    $ ->
+        alarmring = ->
+            t = setInterval(alert(x, y), 2000)
+            return
+        alarmring()
+.timecontainer 
+    %table
+        %tr
+            %td Current time is :
+            %td#time
+        %tr    
+
+    
+    
+// IGNORE, BUT KEEP THIS LINE (Back button)   
+= render :partial => "application/back_to_root"
+    
+:scss
+    .timecontainer {
+        border-style: ridge;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 50%;
+        height: 10%;
+        font-size: x-large;
+    }
+    
+    #time {
+        color: blue;
+    }

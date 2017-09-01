@@ -1,0 +1,346 @@
+-#%a{href: "/v1/oneTwo"}
+-# %img{src: "", width: "0%"}
+    
+    
+:coffeescript
+    $ ->
+        record = document.querySelector('.record')
+        stop = document.querySelector('.stop')
+        soundClips = document.querySelector('.sound-clips')
+        canvas = document.querySelector('.visualizer')
+        mainSection = document.querySelector('.main-controls')
+        # disable stop button while not recording
+        
+        visualize = (stream) ->
+            source = audioCtx.createMediaStreamSource(stream)
+            analyser = audioCtx.createAnalyser()
+        
+            draw = ->
+                `WIDTH = canvas.width`
+                `HEIGHT = canvas.height`
+                requestAnimationFrame draw
+                analyser.getByteTimeDomainData dataArray
+                canvasCtx.fillStyle = 'rgb(200, 200, 200)'
+                canvasCtx.fillRect 0, 0, WIDTH, HEIGHT
+                canvasCtx.lineWidth = 2
+                canvasCtx.strokeStyle = 'rgb(0, 0, 0)'
+                canvasCtx.beginPath()
+                sliceWidth = WIDTH * 1.0 / bufferLength
+                x = 0
+                i = 0
+                while i < bufferLength
+                    v = dataArray[i] / 128.0
+                    y = v * HEIGHT / 2
+                    if `i == 0`
+                        canvasCtx.moveTo x, y
+                    else
+                        canvasCtx.lineTo x, y
+                    x += sliceWidth
+                    i++
+                canvasCtx.lineTo canvas.width, canvas.height / 2
+                canvasCtx.stroke()
+                return
+        
+            analyser.fftSize = 2048
+            bufferLength = analyser.frequencyBinCount
+            dataArray = new Uint8Array(bufferLength)
+            source.connect analyser
+            #analyser.connect(audioCtx.destination);
+            draw()
+            return
+        
+        stop.disabled = true
+        # visualiser setup - create web audio api context and canvas
+        audioCtx = new ((window.AudioContext or webkitAudioContext))
+        canvasCtx = canvas.getContext('2d')
+        #main block for doing the audio recording
+        
+        times = 0
+        
+        if navigator.mediaDevices.getUserMedia
+            console.log 'getUserMedia supported.'
+            constraints = audio: true
+            chunks = []
+
+            onSuccess = (stream) ->
+                mediaRecorder = new MediaRecorder(stream)
+                visualize stream
+                document.onclick = -> decideFunction()
+        
+                start = ->
+                    mediaRecorder.start()
+                    console.log mediaRecorder.state
+                    console.log 'recorder started'
+                    record.style.background = 'red'
+                    stop.disabled = false
+                    record.disabled = true
+                    return
+                        
+                stop = ->
+                    mediaRecorder.stop()
+                    console.log mediaRecorder.state
+                    console.log 'recorder stopped'
+                    record.style.background = ''
+                    record.style.color = ''
+                    # mediaRecorder.requestData();
+                    stop.disabled = true
+                    record.disabled = false
+                    return
+                
+                decideFunction = ->
+                    if times == 0
+                        start()
+                        times++
+                    else
+                        stop()
+                        times--
+                    return
+        
+                mediaRecorder.onstop = (e) ->
+                    console.log 'data available after MediaRecorder.stop() called.'
+                    clipName = prompt('Enter a name for your sound clip?', 'My unnamed clip')
+                    console.log clipName
+                    clipContainer = document.createElement('article')
+                    clipLabel = document.createElement('p')
+                    audio = document.createElement('audio')
+                    deleteButton = document.createElement('button')
+                    clipContainer.classList.add 'clip'
+                    audio.setAttribute 'controls', ''
+                    deleteButton.textContent = 'Delete'
+                    deleteButton.className = 'delete'
+                    if `clipName == null`
+                        clipLabel.textContent = 'My unnamed clip'
+                    else
+                        clipLabel.textContent = clipName
+                    clipContainer.appendChild audio
+                    clipContainer.appendChild clipLabel
+                    clipContainer.appendChild deleteButton
+                    soundClips.appendChild clipContainer
+                    audio.controls = true;
+                    blob = new Blob(chunks, 'type': 'audio/ogg; codecs=opus')
+                    chunks = []
+                    audioURL = window.URL.createObjectURL(blob)
+                    console.log audioURL
+                    audio.src = audioURL
+                    console.log 'recorder stopped'
+        
+                    deleteButton.onclick = (e) ->
+                        `evtTgt = e.target`
+                        evtTgt.parentNode.parentNode.removeChild evtTgt.parentNode
+                        return
+        
+                    clipLabel.onclick = ->
+                        existingName = clipLabel.textContent
+                        newClipName = prompt('Enter a new name for your sound clip?')
+                        if `newClipName == null`
+                            clipLabel.textContent = existingName
+                        else
+                            clipLabel.textContent = newClipName
+                        return
+        
+                    return
+        
+                mediaRecorder.ondataavailable = (e) ->
+                    chunks.push e.data
+                    return
+        
+                return
+        
+            onError = (err) ->
+                console.log 'The following error occured: ' + err
+                return
+        
+            navigator.mediaDevices.getUserMedia(constraints).then onSuccess, onError
+        else
+            console.log 'getUserMedia not supported on your browser!'
+        
+        window.onresize = ->
+            canvas.width = mainSection.offsetWidth
+            return
+        
+        window.onresize()
+  
+%html        
+    %body
+        .wrapper
+            %header
+                %h1 Web dictaphone
+            %section.main-controls
+                %canvas.visualizer{:height => "60px"}
+                #buttons
+                    %button.record Record
+                    %button.stop Stop
+            %section.sound-clips
+        
+        
+   
+// IGNORE, BUT KEEP THIS LINE (Back button)   
+= render :partial => "application/back_to_root"
+    
+:scss
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    html, body {
+        height: 100%;
+    }
+    
+    body {
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        font-size: 0.8rem;
+    }
+    
+    .wrapper {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    h1, h2 {
+        font-size: 2rem;
+        text-align: center;
+        font-weight: normal;
+        padding: 0.5rem 0 0 0;
+    }
+    
+    .main-controls {
+        padding: 0.5rem 0;
+    }
+    
+    canvas {
+        display: block;
+        margin-bottom: 0.5rem;
+    }
+    
+    #buttons {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+    }
+    
+    #buttons button {
+        font-size: 1rem;
+        padding: 1rem;
+        width: calc(50% - 0.25rem);
+    }
+    
+    button {
+        font-size: 1rem;
+        background: #0088cc;
+        text-align: center;
+        color: white;
+        border: none;
+        transition: all 0.2s;
+        padding: 0.5rem;
+    }
+    
+    button:hover, button:focus {
+        box-shadow: inset 0px 0px 10px rgba(255, 255, 255, 1);
+        background: #0ae;
+    }
+    
+    button:active {
+        box-shadow: inset 0px 0px 20px rgba(0,0,0,0.5);
+        transform: translateY(2px);
+    }
+    
+    
+    /* Make the clips use as much space as possible, and
+     * also show a scrollbar when there are too many clips to show
+     * in the available space */
+    .sound-clips {
+        flex: 1;
+        overflow: auto;
+    }
+    
+    section, article {
+        display: block;
+    }
+    
+    .clip {
+        padding-bottom: 1rem;
+    }
+    
+    audio {
+        width: 100%;
+        display: block;
+        margin: 1rem auto 0.5rem;
+    }
+    
+    .clip p {
+        display: inline-block;
+        font-size: 1rem;
+    }
+    
+    .clip button {
+        font-size: 1rem;
+        float: right;
+    }
+    
+    button.delete {
+        background: #f00;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8rem;
+    }
+    
+    /* Checkbox hack to control information box display */
+    
+    label {
+        font-size: 3rem;
+        position: absolute;
+        top: 2px;
+        right: 3px;
+        z-index: 5;
+        cursor: pointer;
+    }
+    
+    input[type=checkbox] {
+         position: absolute;
+         top: -100px;
+    }
+    
+    aside {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        transform: translateX(100%);
+        transition: 0.3s all ease-out;
+        background-color: #efefef;
+        padding: 1rem;
+    }
+    
+    aside p {
+        font-size: 1.2rem;
+        margin: 0.5rem 0;
+    }
+    
+    aside a {
+        color: #666;
+    }
+    
+    /* Toggled State of information box */
+    input[type=checkbox]:checked ~ aside {
+        transform: translateX(0);
+    }
+    
+    /* Cursor when clip name is clicked over */
+    
+    .clip p {
+        cursor: pointer;
+    }
+    
+    /* Adjustments for wider screens */
+    @media all and (min-width: 800px) {
+        /* Don't take all the space as readability is lost when line length
+             goes past a certain size */
+        .wrapper {
+            width: 90%;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+    }

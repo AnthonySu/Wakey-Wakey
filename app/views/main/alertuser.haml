@@ -1,0 +1,121 @@
+:coffeescript
+    $ ->
+        background = document.querySelector('#background')
+        sound = document.querySelector('.demo')
+        
+        ### Disable the alarm function ###
+        disableAlarm = ->
+            sound.pause()
+            location.href = 'recording'
+            return
+        
+        background.onclick = ->
+            disableAlarm()
+    
+  
+
+#background
+    %meta{:content => "text/html; charset=UTF-8", "http-equiv" => "Content-Type"}/
+    %link{:href => "//fonts.googleapis.com/css?family=Raleway", :rel => "stylesheet", :type => "text/css"}/ 
+    .title Good Morning!
+    %audio.demo{:controls => "controls", :loop => "", :style => "display:none", :autoplay => ""}
+        %source{:src => "http://fast.moodmixes.com/images/classical_preview.mp3", :type => "audio/mpeg"}
+    .body-text Press the record button to create a melody and stop the alarm
+    #content-area
+        #notes-area
+            .music-note1
+            .music-note2
+            .music-note3
+    
+    
+// IGNORE, BUT KEEP THIS LINE (Back button)   
+= render :partial => "application/back_to_root"
+:scss
+    $bg: #8FD5D5;
+    #background{
+        height: 100%;
+        width: 100%;
+        color: white;
+        font-family: Raleway, sans-serif;
+        font-size: 6em;
+        text-align: center;
+        background: $bg;
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+    }
+    .title
+    {
+        position: relative; 
+        font-family : Raleway;
+        font-weight : bold;
+        font-size : 45px;
+        color : #FFFFFF;
+        color : rgb(255, 255, 255);
+        padding: 50px; 
+    }
+    
+    .body-text 
+    {
+        font-family : Raleway;
+        font-size : 35px;
+        color : #F1F2F2;
+        color : rgb(241, 242, 242);
+        padding: 30px; 
+        z-index: 10;
+    }
+    
+    #notes-area {
+        z-index: 1;
+    }
+    
+    .music-note1 {
+        background-image : url("/music-note-blue.png");
+        background-repeat : no-repeat;
+        position: fixed; 
+        left: 70px;
+        top: 250px;
+        transform: rotate(9deg);
+        display: flex; 
+        vertical-align: center;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        width: 100%; 
+        height: 100%;
+        padding-left: 100px;
+        opacity: 0.4; 
+    }
+    .music-note2 {
+        background-image : url("/music-note-grey.png");
+        background-repeat : no-repeat;
+        position: fixed;
+        left: -70px;
+        top: 176px;
+        transform: rotate(25deg);
+        display: flex; 
+        vertical-align: center;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        width: 100%; 
+        height: 100%;
+        opacity: 0.4; 
+    }
+    .music-note3 {
+        background-image : url("/music-note-orange.png");
+        background-repeat : no-repeat;
+        position: fixed;
+        left: 188px;
+        top: 408px;
+        transform: rotate(-2deg);
+        display: flex; 
+        vertical-align: center;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: right;
+        width: 100%; 
+        height: 100%; 
+        padding-left: 200px; 
+        opacity: .4; 
+    }

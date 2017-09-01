@@ -1,0 +1,25 @@
+.container-fluid
+    .col-xs-12.col-sm-6
+        %h1 
+            = link_to v4_home_path, id: "back-button", class: "pull-left btn btn-primary" do
+                %span.glyphicon.glyphicon-chevron-left
+            Tweet, tweet!
+        %hr
+        %h4 
+            %em Tweets from YosemiteNPS
+        %hr
+        // %p.lead
+        - "I am writing in ruby!"
+        - p = "I am writing in ruby..secretly"
+        - p + "..jk!"
+        // = @some_information
+        // - @some_information.each do |info|
+        //     = info
+        - @tweets.each do |tweet|
+            %p.lead #{tweet.text}
+            %hr
+        // %hr 
+:scss
+    #back-button{
+        margin-right: 10px;
+    }

@@ -1,0 +1,538 @@
+-#%a{href: "/v1/oneTwo"}
+-# %img{src: "", width: "0%"}
+
+    
+:coffeescript
+    $ ->
+        $.ajax
+            method: "get"
+            url: "/alarms"
+            success: (data)->
+                console.log("ALARMS", data)
+                
+        ######## sounds ########
+        sounds = 
+          32: 'noteC'
+          37: 'noteD'
+          38: 'noteE'
+          39: 'noteF' 
+          40: 'noteG'
+          65: 'noteA'
+          83: 'noteB'
+          68: 'noteC2'
+        
+        document.onkeydown = (e) ->
+          soundId = sounds[e.keyCode]
+          if soundId
+            document.getElementById(soundId).play()
+          else
+            console.log 'key not mapped : code is', e.keyCode
+          return
+        
+        ######## recording ########
+        
+        record = document.querySelector('.record')
+        stop = document.querySelector('.stop')
+        soundClips = document.querySelector('.sound-clips')
+        canvas = document.querySelector('.visualizer')
+        mainSection = document.querySelector('.main-controls')
+        titleItems = document.querySelector('#title-items')
+        downloadButton = document.getElementById('downloadButton')
+        # disable stop button while not recording
+        
+        visualize = (stream) ->
+            source = audioCtx.createMediaStreamSource(stream)
+            analyser = audioCtx.createAnalyser()
+        
+            draw = ->
+                `WIDTH = canvas.width`
+                `HEIGHT = canvas.height`
+                requestAnimationFrame draw
+                analyser.getByteTimeDomainData dataArray
+                canvasCtx.fillStyle = 'rgb(200, 200, 200)'
+                canvasCtx.fillRect 0, 0, WIDTH, HEIGHT
+                canvasCtx.lineWidth = 2
+                canvasCtx.strokeStyle = 'rgb(0, 0, 0)'
+                canvasCtx.beginPath()
+                sliceWidth = WIDTH * 1.0 / bufferLength
+                x = 0
+                i = 0
+                while i < bufferLength
+                    v = dataArray[i] / 128.0
+                    y = v * HEIGHT / 2
+                    if `i == 0`
+                        canvasCtx.moveTo x, y
+                    else
+                        canvasCtx.lineTo x, y
+                    x += sliceWidth
+                    i++
+                canvasCtx.lineTo canvas.width, canvas.height / 2
+                canvasCtx.stroke()
+                return
+        
+            analyser.fftSize = 2048
+            bufferLength = analyser.frequencyBinCount
+            dataArray = new Uint8Array(bufferLength)
+            source.connect analyser
+            #analyser.connect(audioCtx.destination);
+            draw()
+            return
+        
+        stop.disabled = true
+        # visualiser setup - create web audio api context and canvas
+        audioCtx = new ((window.AudioContext or webkitAudioContext))
+        canvasCtx = canvas.getContext('2d')
+        #main block for doing the audio recording
+        
+        times = 0
+        dailymix = []
+        
+        if navigator.mediaDevices.getUserMedia
+            console.log 'getUserMedia supported.'
+            constraints = audio: true
+            chunks = []
+            
+            onSuccess = (stream) ->
+                mediaRecorder = new MediaRecorder(stream)
+                visualize stream
+                downloadButton.href = stream;
+                document.onclick = -> startStopClick()
+        
+                start = ->
+                    mediaRecorder.start()
+                    console.log mediaRecorder.state
+                    console.log 'recorder started'
+                    record.style.background = 'red'
+                    stop.disabled = false
+                    record.disabled = true
+                    titleItems.style.visibility = 'visible';
+                    return
+                        
+                stop = ->
+                    mediaRecorder.stop()
+                    console.log mediaRecorder.state
+                    console.log 'recorder stopped'
+                    record.style.background = ''
+                    record.style.color = ''
+                    # mediaRecorder.requestData();
+                    stop.disabled = true
+                    record.disabled = false
+                    titleItems.style.visibility = 'hidden';
+                    return
+                
+                startStopClick = ->
+                    if times == 0
+                        start()
+                        times++
+                    else
+                        stop()
+                        times--
+                    return
+        
+                mediaRecorder.onstop = (e) ->
+                    console.log 'data available after MediaRecorder.stop() called.'
+                    clipName = prompt('Enter a name for your sound clip?', 'My unnamed clip')
+                    console.log clipName
+                    clipContainer = document.createElement('article')
+                    clipLabel = document.createElement('p')
+                    audio = document.createElement('audio')
+                    deleteButton = document.createElement('button')
+                    clipContainer.classList.add 'clip'
+                    audio.setAttribute 'controls', ''
+                    deleteButton.textContent = 'Delete'
+                    deleteButton.className = 'delete'
+                    if `clipName == null`
+                        clipLabel.textContent = 'My unnamed clip'
+                    else
+                        clipLabel.textContent = clipName
+                    clipContainer.appendChild audio
+                    clipContainer.appendChild clipLabel
+                    clipContainer.appendChild deleteButton
+                    soundClips.appendChild clipContainer
+                    audio.controls = true;
+                    blob = new Blob(chunks, 'type': 'audio/ogg; codecs=opus')
+                    chunks = []
+                    audioURL = window.URL.createObjectURL(blob)
+                    console.log audio.src
+                    audio.src = audioURL
+                    downloadButton.href = audio.src;
+                    downloadButton.download = "RecordedSong.ogg";
+
+                    dailymix.push blob
+                    console.log blob
+                    console.log dailymix
+                    console.log 'recorder stopped'
+        
+
+        
+                    clipLabel.onclick = ->
+                        existingName = clipLabel.textContent
+                        newClipName = prompt('Enter a new name for your sound clip?')
+                        if `newClipName == null`
+                            clipLabel.textContent = existingName
+                        else
+                            clipLabel.textContent = newClipName
+                        return
+        
+                    return
+        
+                mediaRecorder.ondataavailable = (e) ->
+                    chunks.push e.data
+                    return
+        
+                return
+        
+            onError = (err) ->
+                console.log 'The following error occured: ' + err
+                return
+        
+            navigator.mediaDevices.getUserMedia(constraints).then onSuccess, onError
+        else
+            console.log 'getUserMedia not supported on your browser!'
+        
+        window.onresize = ->
+            canvas.width = mainSection.offsetWidth
+            return
+        
+        window.onresize()
+      
+%body
+    %h1= @data[0].audio
+    %audio#noteC
+        %source{:src => "/audio_samples/noteC.wav", :type => "audio/mpeg"}
+    %audio#noteD
+        %source{:src => "/audio_samples/noteD.wav", :type => "audio/mpeg"}
+    %audio#noteE
+        %source{:src => "/audio_samples/noteE.wav", :type => "audio/mpeg"}
+    %audio#noteF
+        %source{:src => "/audio_samples/noteF.wav", :type => "audio/mpeg"}
+    %audio#noteG
+        %source{:src => "/audio_samples/noteG.wav", :type => "audio/mpeg"}
+    %audio#noteA
+        %source{:src => "/audio_samples/noteA.wav", :type => "audio/mpeg"}
+    %audio#noteB
+        %source{:src => "/audio_samples/noteB.wav", :type => "audio/mpeg"}
+    %audio#noteC2
+        %source{:src => "/audio_samples/noteC2.wav", :type => "audio/mpeg"}
+    %audio#recording{:controls => ""}
+        %source{:src => "dailymix[0]", :type => "audio/ogg"}
+    
+%html
+    %meta{:content => "text/html; charset=UTF-8", "http-equiv" => "Content-Type"}/
+    %link{:href => "//fonts.googleapis.com/css?family=Raleway", :rel => "stylesheet", :type => "text/css"}/
+    %body
+        #title-area
+            #title-items
+                .title Recording
+                .pulse-button 
+        #content-area
+            .music-note1
+            .music-note2
+            .music-note3
+        .wrapper
+            %header
+                %h1 
+            %section.main-controls
+                %canvas.visualizer{:height => "60px"}
+                #buttons
+                    %button.record Record
+                    %button.stop Stop
+                    %a#downloadButton.button Download
+
+            %section.sound-clips    
+            
+// IGNORE, BUT KEEP THIS LINE (Back button)   
+= render :partial => "application/back_to_root"
+/app/assets/images/audio_samples
+
+:scss
+    html,body {
+        width: 100%;
+        height: 100%;
+        padding: 0px;
+        overflow: hidden; 
+    }
+
+
+    .background-blue {
+        background : #304878;
+        background : rgba(48, 72, 120, 1);
+        position: fixed; 
+        left : 0px;
+        top : 0px;
+        display: flex;
+        width : 100%;
+        height : 100%;
+    }
+    #title-area {
+        background : #304878;
+        background : rgba(48, 72, 120, 1);
+        //position : absolute;
+        position: fixed;
+        left : 0px;
+        top : 0px;
+        width : 375px;
+        height : 123px;
+    }
+    
+    #title-items {
+        visibility: hidden;
+        height: 100%;
+        width: 85%;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+    }
+    
+    #content-area {
+        background : #304878;
+        background : rgba(48, 72, 120, 1);
+        position : fixed;
+        left : 0px;
+        top : 123px;
+        width : 375px;
+        height : 543px;
+        display: flex;
+        vertical-align: center;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        border: none;
+    }
+    .title {
+        font-family : Raleway;
+        font-size : 60px;
+        color : #BEBEBE;
+        color : rgb(190, 190, 190);
+        //padding: 30px; 
+        position: fixed;
+        
+    }
+    
+    .pulse-button {
+        width: 50px;
+        height: 50px;
+        border: none;
+        box-shadow: 0 0 0 0 rgba(232, 76, 61, 0.7);
+        border-radius: 50%;
+        background-color: #e84c3d;
+
+        -webkit-animation: pulse 1.25s infinite cubic-bezier(0.66, 0, 0, 1);
+        -moz-animation: pulse 1.25s infinite cubic-bezier(0.66, 0, 0, 1);
+        -ms-animation: pulse 1.25s infinite cubic-bezier(0.66, 0, 0, 1);
+        animation: pulse 1.25s infinite cubic-bezier(0.66, 0, 0, 1);
+    }
+    
+    .music-note1 {
+        background-image : url("/music-note2.png");
+        background-repeat : no-repeat;
+        position: fixed; 
+        left: 88px;
+        top: 230px;
+        transform: rotate(9deg);
+        display: flex; 
+        vertical-align: center;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        width: 100%; 
+        height: 100%;
+        padding-left: 100px;
+        opacity: 0.8;
+
+    }
+    .music-note2 {
+        background-image : url("/music-note1.png");
+        background-repeat : no-repeat;
+        position: fixed;
+        left: -70px;
+        top: 176px;
+        transform: rotate(25deg);
+        display: flex; 
+        vertical-align: center;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        width: 100%; 
+        height: 100%;
+        opacity: 0.8;
+    }
+    .music-note3 {
+        background-image : url("/music-note3.png");
+        background-repeat : no-repeat;
+        position: fixed;
+        left: 188px;
+        top: 408px;
+        transform: rotate(-2deg);
+        display: flex; 
+        vertical-align: center;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: right;
+        width: 100%; 
+        height: 100%; 
+        padding-left: 200px; 
+        opacity: 0.8;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    html, body {
+        height: 100%;
+    }
+    
+    body {
+        font-family: 'Raleway', Helvetica, Arial, sans-serif;
+        font-size: 0.8rem;
+    }
+    
+    .wrapper {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        left: 10%;
+        top: 10%;
+    }
+    
+    h1, h2 {
+        font-size: 2rem;
+        text-align: center;
+        font-weight: normal;
+        padding: 0.5rem 0 0 0;
+    }
+    
+    .main-controls {
+        padding: 0.5rem 0;
+        opacity: 0.6;
+        // position: fixed;
+        // top: 18%;
+    }
+    
+    #downloadButton {
+        color: white;
+        font-size: 2em;
+    }
+    
+    canvas {
+        display: block;
+        margin-bottom: 0.5rem;
+    }
+    
+    #buttons {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+    }
+    
+    #buttons button {
+        font-size: 1rem;
+        padding: 1rem;
+        width: calc(50% - 0.25rem);
+    }
+    
+    button {
+        font-size: 1rem;
+        background: #0088cc;
+        text-align: center;
+        color: white;
+        border: none;
+        transition: all 0.2s;
+        padding: 0.5rem;
+        display: none;
+    }
+    
+    button:hover, button:focus {
+        box-shadow: inset 0px 0px 10px rgba(255, 255, 255, 1);
+        background: #0ae;
+    }
+    
+    button:active {
+        box-shadow: inset 0px 0px 20px rgba(0,0,0,0.5);
+        transform: translateY(2px);
+    }
+    
+    
+    /* Make the clips use as much space as possible, and
+     * also show a scrollbar when there are too many clips to show
+     * in the available space */
+    .sound-clips {
+        flex: 1;
+        overflow: auto;
+    }
+    
+    section, article {
+        display: block;
+    }
+    
+    .clip {
+        padding-bottom: 1rem;
+    }
+    
+    audio {
+        width: 100%;
+        display: block;
+        margin: 1rem auto 0.5rem;
+        opacity: 0.9;
+    }
+    
+    .clip p {
+        display: inline-block;
+        font-size: 1rem;
+        color: #fff;
+    }
+    
+    .clip button {
+        font-size: 1rem;
+        float: right;
+    }
+    
+    button.delete {
+        background: #f00;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8rem;
+        opacity: 0.7;
+    }
+    
+    /* Checkbox hack to control information box display */
+    
+    label {
+        font-size: 3rem;
+        position: absolute;
+        top: 2px;
+        right: 3px;
+        z-index: 5;
+        cursor: pointer;
+    }
+    
+    input[type=checkbox] {
+         position: absolute;
+         top: -100px;
+    }
+    
+    
+    /* Cursor when clip name is clicked over */
+    
+    .clip p {
+        cursor: pointer;
+    }
+    
+    /* Adjustments for wider screens */
+    @media all and (min-width: 800px) {
+        /* Don't take all the space as readability is lost when line length
+             goes past a certain size */
+        .wrapper {
+            width: 90%;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+    }
+    
+    @-webkit-keyframes pulse {to {box-shadow: 0 0 0 45px rgba(232, 76, 61, 0);}}
+    @-moz-keyframes pulse {to {box-shadow: 0 0 0 45px rgba(232, 76, 61, 0);}}
+    @-ms-keyframes pulse {to {box-shadow: 0 0 0 45px rgba(232, 76, 61, 0);}}
+    @keyframes pulse {to {box-shadow: 0 0 0 45px rgba(232, 76, 61, 0);}}

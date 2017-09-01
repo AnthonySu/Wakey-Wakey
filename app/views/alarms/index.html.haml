@@ -1,0 +1,25 @@
+%h1 Listing alarms
+
+%table
+  %thead
+    %tr
+      %th Name
+      %th Description
+      %th Audio
+      %th
+      %th
+      %th
+
+  %tbody
+    - @alarms.each do |alarm|
+      %tr
+        %td= alarm.name
+        %td= alarm.description
+        %td= alarm.audio
+        %td= link_to 'Show', alarm
+        %td= link_to 'Edit', edit_alarm_path(alarm)
+        %td= link_to 'Destroy', alarm, :method => :delete, :data => { :confirm => 'Are you sure?' }
+
+%br
+
+= link_to 'New Alarm', new_alarm_path
